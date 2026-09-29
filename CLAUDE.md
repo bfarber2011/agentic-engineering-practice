@@ -8,8 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm install          # install dependencies
 npm run db:seed      # create schema + seed taskr.db (5 users, 3 projects, 20 tasks, 15 comments, 8 tags)
 npm run db:reset      # delete taskr.db and re-seed
-npm run dev           # start server with file watching (Node 18+), port 3000
-npm start             # start server without watching
+npm run dev           # node --watch src/index.js: start server with file watching (Node 18+), port 3000
+npm start             # node src/index.js: start server without watching
 npm test              # run full Jest suite
 npm run test:watch    # Jest in watch mode
 ```
@@ -20,9 +20,11 @@ Tests run against an in-memory SQLite database (`NODE_ENV=test` forces `src/db/c
 
 Jest only picks up `tests/*.test.js` (see `jest.testMatch` in `package.json`). New test files must be named `resource.test.js` (e.g. `comments.test.js`) or they will silently never run.
 
-## Architecture
+## Folder structure
 
-Taskr is a small Express + better-sqlite3 REST API (see README.md for the resource list: `/users`, `/projects`, `/tasks`, `/tasks/:id/comments`, `/tags`). Code lives under `src/` in strict layers; all file names are kebab-case.
+Taskr is a small Express + better-sqlite3 REST API (see README.md for the resource list: `/users`, `/projects`, `/tasks`, `/tasks/:id/comments`, `/tags`). The entry point is `src/index.js`, and all code lives under `src/` in strict layers:
+
+**routes → services → queries → database connection** (`src/routes/` call `src/services/`, which call `src/db/queries/`, which use the shared connection in `src/db/connection.js`).
 
 ```
 src/
@@ -52,6 +54,12 @@ tests/            supertest suites, one per resource (tasks.test.js, users.test.
 ### Database schema
 
 SQLite tables: `users`, `projects` (owned by a user), `tasks` (belongs to a project, assigned to a user, `status` is one of `active`/`completed`/`archived` via CHECK constraint), `comments` (on a task, by a user), `tags`, and `task_tags` (many-to-many join). The schema is defined once, in `src/db/schema.js`.
+
+## Naming conventions
+
+- **All files and directories use kebab-case**, e.g. `task-tags.js`, `tasks-service.js`, `error-handler.js`. No camelCase, PascalCase or snake_case file names.
+- Suffix files by layer: `src/routes/<resource>.js`, `src/services/<resource>-service.js`, `src/db/queries/<resource>-queries.js`.
+- Test files are `tests/<resource>.test.js`.
 
 ## Conventions
 

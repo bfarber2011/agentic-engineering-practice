@@ -1,0 +1,5 @@
+# SQLite database and its WAL-mode sidecar files
+taskr.db
+taskr.db-wal
+taskr.db-shm
+taskr.db-journal
