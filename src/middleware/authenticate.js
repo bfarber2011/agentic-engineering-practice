@@ -1,3 +1,5 @@
+const { createHttpError } = require('../utils/http-error');
+
 // TODO: replace with real JWT validation
 
 function authenticate(req, res, next) {
@@ -5,7 +7,7 @@ function authenticate(req, res, next) {
   if (apiKey === (process.env.API_KEY || 'dev-key')) {
     return next();
   }
-  res.status(401).json({ error: 'Unauthorized' });
+  next(createHttpError(401, 'Unauthorized'));
 }
 
 module.exports = { authenticate };
